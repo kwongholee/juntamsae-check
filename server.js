@@ -13,6 +13,7 @@ const serviceAccountAuth = new JWT({
   ],
 });
 const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth);
+data = [];
 
 async function authGoogleSheet(){
 	try{
@@ -22,12 +23,12 @@ async function authGoogleSheet(){
 	}
 }
 
-async function readFirstSheetRow(){ 
+async function readFirstSheetRow(data){ 
 	var sheet = doc.sheetsByIndex[0]; 
-    var rows = await sheet.getRows({offset:3, limit:100}); 
-    rows.forEach((ele)=>{
-    	console.log( ele._rawData[0] , ele._rawData[1] )
-    });
+  var rows = await sheet.getRows({offset:0, limit:200});
+  await rows.forEach((ele)=>{
+    data.push(ele._rawData)
+  });
 }
 
 app.listen(8080, (req,res) => {
@@ -36,6 +37,7 @@ app.listen(8080, (req,res) => {
 })
 
 app.get('/', (req,res) => {
-  readFirstSheetRow();
-  res.send('good')
+  result = readFirstSheetRow(data);
+  console.log('1')
+  res.send(result)
 })
